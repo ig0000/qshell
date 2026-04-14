@@ -395,6 +395,12 @@ func TestBuildInjectionParts_HTTPRejectsInvalidURL(t *testing.T) {
 	}
 }
 
+func TestBuildInjectionParts_QiniuRejectsInvalidURL(t *testing.T) {
+	if _, err := BuildInjectionParts("qiniu", "", "file:///tmp/a", nil); err == nil {
+		t.Fatal("BuildInjectionParts(qiniu invalid url) expected error, got nil")
+	}
+}
+
 func TestBuildInjectionParts_RejectsMissingType(t *testing.T) {
 	if _, err := BuildInjectionParts("", "", "", nil); err == nil {
 		t.Fatal("BuildInjectionParts(missing type) expected error, got nil")
@@ -417,5 +423,18 @@ func TestBuildInjectionParts_OpenAIEmptyOptionalFields(t *testing.T) {
 	}
 	if parts.OpenAI.APIKey != nil || parts.OpenAI.BaseURL != nil {
 		t.Fatalf("openai optional fields = %+v, want nil pointers", parts.OpenAI)
+	}
+}
+
+func TestBuildInjectionParts_QiniuEmptyOptionalFields(t *testing.T) {
+	parts, err := BuildInjectionParts("qiniu", "", "", nil)
+	if err != nil {
+		t.Fatalf("BuildInjectionParts(qiniu) error = %v", err)
+	}
+	if parts.Qiniu == nil {
+		t.Fatal("BuildInjectionParts(qiniu) did not build qiniu injection")
+	}
+	if parts.Qiniu.APIKey != nil || parts.Qiniu.BaseURL != nil {
+		t.Fatalf("qiniu optional fields = %+v, want nil pointers", parts.Qiniu)
 	}
 }

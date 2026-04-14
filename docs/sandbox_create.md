@@ -31,7 +31,7 @@ $ qshell sandbox create --doc
 内联注入说明：
 - `type` 支持 `openai`、`anthropic`、`gemini`、`qiniu`、`http`
 - `api-key` 可用于 `openai`、`anthropic`、`gemini`、`qiniu`
-- `base-url` 可用于覆盖默认目标地址；`type=http` 时必填
+- `base-url` 可用于覆盖默认目标地址；`type=http` 时必填，`type=qiniu` 默认目标地址为 `api.qnaigc.com`
 - `headers` 仅用于 `type=http`，多个请求头使用逗号分隔，例如 `headers=Authorization=Bearer token,X-Env=prod`
 - `headers` 建议放在内联配置的最后一个字段，避免和其他顶层字段分隔符冲突
 

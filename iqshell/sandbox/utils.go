@@ -128,23 +128,23 @@ func BuildInjectionParts(typ, apiKey, baseURL string, headers map[string]string)
 			},
 		}, nil
 	case "qiniu":
+		validatedBaseURL, err := validateBaseURL(baseURL, false)
+		if err != nil {
+			return InjectionParts{}, err
+		}
 		return InjectionParts{
 			Qiniu: &sdkSandbox.QiniuInjection{
 				APIKey:  optionalString(apiKey),
-				BaseURL: optionalString(baseURL),
+				BaseURL: optionalString(validatedBaseURL),
 			},
 		}, nil
 	case "http":
-		trimmedBaseURL := strings.TrimSpace(baseURL)
-		if trimmedBaseURL == "" {
-			return InjectionParts{}, fmt.Errorf("base URL is required when injection type is http")
-		}
-		parsedURL, err := url.Parse(trimmedBaseURL)
-		if err != nil || parsedURL.Host == "" || (parsedURL.Scheme != "http" && parsedURL.Scheme != "https") {
-			return InjectionParts{}, fmt.Errorf("base URL must be a valid http/https URL")
+		validatedBaseURL, err := validateBaseURL(baseURL, true)
+		if err != nil {
+			return InjectionParts{}, err
 		}
 		httpInjection := &sdkSandbox.HTTPInjection{
-			BaseURL: trimmedBaseURL,
+			BaseURL: validatedBaseURL,
 		}
 		if len(headers) > 0 {
 			httpInjection.Headers = &headers
@@ -155,6 +155,21 @@ func BuildInjectionParts(typ, apiKey, baseURL string, headers map[string]string)
 	default:
 		return InjectionParts{}, fmt.Errorf("unsupported injection type %q, must be one of: %s", typ, supportedInjectionTypes)
 	}
+}
+
+func validateBaseURL(baseURL string, required bool) (string, error) {
+	trimmedBaseURL := strings.TrimSpace(baseURL)
+	if trimmedBaseURL == "" {
+		if required {
+			return "", fmt.Errorf("base URL is required when injection type is http")
+		}
+		return "", nil
+	}
+	parsedURL, err := url.Parse(trimmedBaseURL)
+	if err != nil || parsedURL.Host == "" || (parsedURL.Scheme != "http" && parsedURL.Scheme != "https") {
+		return "", fmt.Errorf("base URL must be a valid http/https URL")
+	}
+	return trimmedBaseURL, nil
 }
 
 func optionalString(value string) *string {

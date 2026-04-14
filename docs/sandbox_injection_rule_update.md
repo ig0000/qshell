@@ -38,6 +38,12 @@ $ qshell sandbox injection-rule update rule-xxxxxxxxxxxx --name new-name
 $ qshell sandbox injection-rule update rule-xxxxxxxxxxxx --type gemini --api-key sk-gem --base-url https://gemini-proxy.example.com
 ```
 
+更新为七牛 AI API 注入规则：
+
+```bash
+$ qshell sandbox injection-rule update rule-xxxxxxxxxxxx --type qiniu --api-key ak-new
+```
+
 更新自定义 HTTP 请求头：
 
 ```bash
