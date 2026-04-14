@@ -101,6 +101,8 @@ type InjectionParts struct {
 	HTTP      *sdkSandbox.HTTPInjection
 }
 
+const supportedInjectionTypes = "openai, anthropic, gemini, qiniu, http"
+
 // BuildInjectionParts builds a provider-specific injection payload from the given inputs.
 func BuildInjectionParts(typ, apiKey, baseURL string, headers map[string]string) (InjectionParts, error) {
 	switch strings.ToLower(strings.TrimSpace(typ)) {
@@ -149,9 +151,9 @@ func BuildInjectionParts(typ, apiKey, baseURL string, headers map[string]string)
 		}
 		return InjectionParts{HTTP: httpInjection}, nil
 	case "":
-		return InjectionParts{}, fmt.Errorf("injection type is required and must be one of: openai, anthropic, gemini, qiniu, http")
+		return InjectionParts{}, fmt.Errorf("injection type is required and must be one of: %s", supportedInjectionTypes)
 	default:
-		return InjectionParts{}, fmt.Errorf("unsupported injection type %q, must be one of: openai, anthropic, gemini, qiniu, http", typ)
+		return InjectionParts{}, fmt.Errorf("unsupported injection type %q, must be one of: %s", typ, supportedInjectionTypes)
 	}
 }
 

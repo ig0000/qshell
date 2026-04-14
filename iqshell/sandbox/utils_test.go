@@ -2,8 +2,6 @@ package sandbox
 
 import (
 	"testing"
-
-	sdkSandbox "github.com/qiniu/go-sdk/v7/sandbox"
 )
 
 // === ParseMetadata tests ===
@@ -419,12 +417,5 @@ func TestBuildInjectionParts_OpenAIEmptyOptionalFields(t *testing.T) {
 	}
 	if parts.OpenAI.APIKey != nil || parts.OpenAI.BaseURL != nil {
 		t.Fatalf("openai optional fields = %+v, want nil pointers", parts.OpenAI)
-	}
-}
-
-func TestParseStates_TypeCompatibility(t *testing.T) {
-	states := ParseStates("running,paused")
-	if _, ok := any(states[0]).(sdkSandbox.SandboxState); !ok {
-		t.Fatal("ParseStates result does not contain sandbox state type")
 	}
 }
