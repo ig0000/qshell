@@ -1,3 +1,8 @@
+# 2.19.3
+## 更新
+1. 升级 `github.com/qiniu/go-sdk/v7` 到 `v7.26.9`
+2. 沙箱注入规则新增 `qiniu` 注入类型，支持七牛 AI API 网关（默认 host: `api.qnaigc.com`）
+
 # 2.19.2
 ## 更新
 1. 沙箱注入规则与最新 Injection APIs 对齐

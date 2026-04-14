@@ -3,7 +3,7 @@
 ## 命令格式
 
 ```bash
-qshell sandbox injection-rule update <ruleID> [--name <name>] [--type <openai|anthropic|gemini|http>] [--api-key <apiKey>] [--base-url <baseURL>] [--headers <headers>]
+qshell sandbox injection-rule update <ruleID> [--name <name>] [--type <openai|anthropic|gemini|qiniu|http>] [--api-key <apiKey>] [--base-url <baseURL>] [--headers <headers>]
 ```
 
 ## 查看帮助
