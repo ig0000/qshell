@@ -2,6 +2,8 @@ package sandbox
 
 import (
 	"testing"
+
+	sdkSandbox "github.com/qiniu/go-sdk/v7/sandbox"
 )
 
 // === ParseMetadata tests ===
@@ -339,5 +341,90 @@ func TestParseLoggers_TrailingComma(t *testing.T) {
 	got := ParseLoggers("envd,")
 	if len(got) != 1 || got[0] != "envd" {
 		t.Errorf("ParseLoggers(\"envd,\") = %v, want [envd]", got)
+	}
+}
+
+// === ParseMetadataMap tests ===
+
+func TestParseMetadataMap_Empty(t *testing.T) {
+	if got := ParseMetadataMap(""); len(got) != 0 {
+		t.Errorf("ParseMetadataMap(empty) = %v, want empty map", got)
+	}
+}
+
+func TestParseMetadataMap_MixedPairs(t *testing.T) {
+	got := ParseMetadataMap("k1=v1, invalid, k2 = v2")
+	if len(got) != 2 || got["k1"] != "v1" || got["k2"] != "v2" {
+		t.Errorf("ParseMetadataMap(mixed) = %v, want map[k1:v1 k2:v2]", got)
+	}
+}
+
+// === BuildInjectionParts tests ===
+
+func TestBuildInjectionParts_Qiniu(t *testing.T) {
+	parts, err := BuildInjectionParts("qiniu", "sk-qiniu", " https://api.qnaigc.com ", nil)
+	if err != nil {
+		t.Fatalf("BuildInjectionParts(qiniu) error = %v", err)
+	}
+	if parts.Qiniu == nil {
+		t.Fatal("BuildInjectionParts(qiniu) did not build qiniu injection")
+	}
+	if parts.Qiniu.APIKey == nil || *parts.Qiniu.APIKey != "sk-qiniu" {
+		t.Fatalf("qiniu api key = %v, want sk-qiniu", parts.Qiniu.APIKey)
+	}
+	if parts.Qiniu.BaseURL == nil || *parts.Qiniu.BaseURL != "https://api.qnaigc.com" {
+		t.Fatalf("qiniu base URL = %v, want https://api.qnaigc.com", parts.Qiniu.BaseURL)
+	}
+}
+
+func TestBuildInjectionParts_HTTPWithHeaders(t *testing.T) {
+	headers := map[string]string{"Authorization": "Bearer token"}
+	parts, err := BuildInjectionParts("http", "", "https://api.example.com", headers)
+	if err != nil {
+		t.Fatalf("BuildInjectionParts(http) error = %v", err)
+	}
+	if parts.HTTP == nil || parts.HTTP.Headers == nil {
+		t.Fatalf("BuildInjectionParts(http) = %+v, want headers", parts.HTTP)
+	}
+	if got := (*parts.HTTP.Headers)["Authorization"]; got != "Bearer token" {
+		t.Fatalf("http headers Authorization = %q, want %q", got, "Bearer token")
+	}
+}
+
+func TestBuildInjectionParts_HTTPRejectsInvalidURL(t *testing.T) {
+	if _, err := BuildInjectionParts("http", "", "file:///tmp/a", nil); err == nil {
+		t.Fatal("BuildInjectionParts(http invalid url) expected error, got nil")
+	}
+}
+
+func TestBuildInjectionParts_RejectsMissingType(t *testing.T) {
+	if _, err := BuildInjectionParts("", "", "", nil); err == nil {
+		t.Fatal("BuildInjectionParts(missing type) expected error, got nil")
+	}
+}
+
+func TestBuildInjectionParts_RejectsUnknownType(t *testing.T) {
+	if _, err := BuildInjectionParts("unknown", "", "", nil); err == nil {
+		t.Fatal("BuildInjectionParts(unknown type) expected error, got nil")
+	}
+}
+
+func TestBuildInjectionParts_OpenAIEmptyOptionalFields(t *testing.T) {
+	parts, err := BuildInjectionParts("openai", "", "", nil)
+	if err != nil {
+		t.Fatalf("BuildInjectionParts(openai) error = %v", err)
+	}
+	if parts.OpenAI == nil {
+		t.Fatal("BuildInjectionParts(openai) did not build openai injection")
+	}
+	if parts.OpenAI.APIKey != nil || parts.OpenAI.BaseURL != nil {
+		t.Fatalf("openai optional fields = %+v, want nil pointers", parts.OpenAI)
+	}
+}
+
+func TestParseStates_TypeCompatibility(t *testing.T) {
+	states := ParseStates("running,paused")
+	if _, ok := any(states[0]).(sdkSandbox.SandboxState); !ok {
+		t.Fatal("ParseStates result does not contain sandbox state type")
 	}
 }
