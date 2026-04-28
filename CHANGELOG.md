@@ -1,3 +1,8 @@
+# 2.19.5
+## 更新
+1. `qshell sandbox` 系列命令接入 qshell 账号体系：执行前自动加载工作区，AK/SK 优先取自 `qshell user` 配置的当前账号，环境变量 `QINIU_ACCESS_KEY` / `QINIU_SECRET_KEY` 作为兜底
+2. `qshell sandbox injection-rule` 子命令现在使用 AK/SK 鉴权（与 go-sdk 设计对齐），`sandbox` / `template` 子命令仍使用 API Key；当所需凭据缺失时给出明确提示
+
 # 2.19.4
 ## 新增
 1. `qshell sandbox template` 系列命令支持 `qshell.sandbox.toml` 配置文件，可持久化构建参数（name、dockerfile、from_image、cpu_count、memory_mb 等）

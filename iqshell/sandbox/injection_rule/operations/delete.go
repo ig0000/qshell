@@ -19,7 +19,7 @@ type DeleteInfo struct {
 
 // Delete deletes one or more injection rules.
 func Delete(info DeleteInfo) {
-	client, err := sbClient.NewSandboxClient()
+	client, err := sbClient.NewInjectionRuleClient()
 	if err != nil {
 		sbClient.PrintError("%v", err)
 		return

@@ -56,7 +56,7 @@ var templateListCmdBuilder = func(cfg *iqshell.Config) *cobra.Command {
   qshell sbx tpl ls --format json`,
 		Run: func(cmd *cobra.Command, args []string) {
 			cfg.CmdCfg.CmdId = docs.SandboxTemplateListType
-			if iqshell.ShowDocumentIfNeeded(cfg) {
+			if !iqshell.CheckAndLoad(cfg, iqshell.CheckAndLoadInfo{}) {
 				return
 			}
 			operations.List(info)
@@ -81,7 +81,7 @@ var templateGetCmdBuilder = func(cfg *iqshell.Config) *cobra.Command {
   qshell sbx tpl gt`,
 		Run: func(cmd *cobra.Command, args []string) {
 			cfg.CmdCfg.CmdId = docs.SandboxTemplateGetType
-			if iqshell.ShowDocumentIfNeeded(cfg) {
+			if !iqshell.CheckAndLoad(cfg, iqshell.CheckAndLoadInfo{}) {
 				return
 			}
 			id := ""
@@ -119,7 +119,7 @@ var templateDeleteCmdBuilder = func(cfg *iqshell.Config) *cobra.Command {
   qshell sbx tpl dl -y`,
 		Run: func(cmd *cobra.Command, args []string) {
 			cfg.CmdCfg.CmdId = docs.SandboxTemplateDeleteType
-			if iqshell.ShowDocumentIfNeeded(cfg) {
+			if !iqshell.CheckAndLoad(cfg, iqshell.CheckAndLoadInfo{}) {
 				return
 			}
 			info.TemplateIDs = args
@@ -141,7 +141,7 @@ var templateBuildsCmdBuilder = func(cfg *iqshell.Config) *cobra.Command {
   qshell sbx tpl bds tmpl-xxxxxxxxxxxx build-xxxxxxxxxxxx`,
 		Run: func(cmd *cobra.Command, args []string) {
 			cfg.CmdCfg.CmdId = docs.SandboxTemplateBuildsType
-			if iqshell.ShowDocumentIfNeeded(cfg) {
+			if !iqshell.CheckAndLoad(cfg, iqshell.CheckAndLoadInfo{}) {
 				return
 			}
 			if len(args) != 2 {
@@ -213,7 +213,7 @@ because the rebuild API must carry the Dockerfile content in the request body.
   qshell sbx tpl bd --config ./configs/prod.toml --wait`,
 		Run: func(cmd *cobra.Command, args []string) {
 			cfg.CmdCfg.CmdId = docs.SandboxTemplateBuildType
-			if iqshell.ShowDocumentIfNeeded(cfg) {
+			if !iqshell.CheckAndLoad(cfg, iqshell.CheckAndLoadInfo{}) {
 				return
 			}
 			info.NoCacheChanged = cmd.Flags().Changed("no-cache")
@@ -255,7 +255,7 @@ var templatePublishCmdBuilder = func(cfg *iqshell.Config) *cobra.Command {
   qshell sbx tpl pb -y`,
 		Run: func(cmd *cobra.Command, args []string) {
 			cfg.CmdCfg.CmdId = docs.SandboxTemplatePublishType
-			if iqshell.ShowDocumentIfNeeded(cfg) {
+			if !iqshell.CheckAndLoad(cfg, iqshell.CheckAndLoadInfo{}) {
 				return
 			}
 			info.TemplateIDs = args
@@ -286,7 +286,7 @@ var templateUnpublishCmdBuilder = func(cfg *iqshell.Config) *cobra.Command {
   qshell sbx tpl upb -y`,
 		Run: func(cmd *cobra.Command, args []string) {
 			cfg.CmdCfg.CmdId = docs.SandboxTemplateUnpublishType
-			if iqshell.ShowDocumentIfNeeded(cfg) {
+			if !iqshell.CheckAndLoad(cfg, iqshell.CheckAndLoadInfo{}) {
 				return
 			}
 			info.TemplateIDs = args
@@ -318,7 +318,7 @@ var templateInitCmdBuilder = func(cfg *iqshell.Config) *cobra.Command {
   qshell sbx tpl it --name my-api --language typescript --path ./my-api`,
 		Run: func(cmd *cobra.Command, args []string) {
 			cfg.CmdCfg.CmdId = docs.SandboxTemplateInitType
-			if iqshell.ShowDocumentIfNeeded(cfg) {
+			if !iqshell.CheckAndLoad(cfg, iqshell.CheckAndLoadInfo{}) {
 				return
 			}
 			operations.Init(info)
