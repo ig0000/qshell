@@ -290,15 +290,11 @@ var templateInitCmdBuilder = func(cfg *iqshell.Config) *cobra.Command {
 		Aliases: []string{"it"},
 		Short:   "Initialize a new template project (alias: it)",
 		Long:    "Scaffold a new template project with boilerplate files for the selected language.",
-		Example: `  # Interactive mode
-  qshell sandbox template init
-  qshell sbx tpl it
-
-  # Non-interactive mode
+		Example: `  # Initialize a Go project
   qshell sandbox template init --name my-template --language go
   qshell sbx tpl it --name my-template --language go
 
-  # Non-interactive mode with custom path
+  # Initialize at a custom path
   qshell sandbox template init --name my-api --language typescript --path ./my-api
   qshell sbx tpl it --name my-api --language typescript --path ./my-api`,
 		Run: func(cmd *cobra.Command, args []string) {
