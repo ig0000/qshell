@@ -2,7 +2,6 @@ package operations
 
 import (
 	"context"
-	"fmt"
 	"os"
 
 	sbClient "github.com/qiniu/qshell/v2/iqshell/sandbox"
@@ -29,18 +28,8 @@ func Delete(info DeleteInfo) {
 
 	ctx := context.Background()
 
-	if !info.Yes {
-		if !sbClient.IsInteractive() {
-			sbClient.PrintError("confirmation required but stdin is not a terminal; pass --yes to confirm in non-interactive mode")
-			return
-		}
-		fmt.Printf("Are you sure you want to delete %d injection rule(s)? [y/N] ", len(info.RuleIDs))
-		var confirm string
-		fmt.Scanln(&confirm)
-		if confirm != "y" && confirm != "Y" {
-			fmt.Println("Aborted")
-			return
-		}
+	if !info.Yes && !sbClient.Confirm("Are you sure you want to delete %d injection rule(s)?", len(info.RuleIDs)) {
+		return
 	}
 
 	hasError := false

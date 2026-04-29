@@ -35,12 +35,12 @@ func clearEnvVars(t *testing.T) {
 }
 
 // stubWorkspaceAccount overrides workspaceAccountLookup for the duration of a
-// test. Pass ok=false to simulate an absent qshell account.
-func stubWorkspaceAccount(t *testing.T, ak, sk string, ok bool) {
+// test. Pass empty strings to simulate an absent qshell account.
+func stubWorkspaceAccount(t *testing.T, ak, sk string) {
 	t.Helper()
 	saved := workspaceAccountLookup
-	workspaceAccountLookup = func() (string, string, bool) {
-		return ak, sk, ok
+	workspaceAccountLookup = func() (string, string) {
+		return ak, sk
 	}
 	t.Cleanup(func() {
 		workspaceAccountLookup = saved
@@ -98,7 +98,7 @@ func TestResolveConfig_QiniuKeyWithE2BEndpoint(t *testing.T) {
 
 func TestResolveCredentials_WorkspaceTakesPriority(t *testing.T) {
 	clearEnvVars(t)
-	stubWorkspaceAccount(t, "ws-ak", "ws-sk", true)
+	stubWorkspaceAccount(t, "ws-ak", "ws-sk")
 
 	// Both sources have AK/SK; workspace must win.
 	os.Setenv(EnvQiniuAccessKey, "env-ak")
@@ -113,7 +113,7 @@ func TestResolveCredentials_WorkspaceTakesPriority(t *testing.T) {
 
 func TestResolveCredentials_FallbackToEnv(t *testing.T) {
 	clearEnvVars(t)
-	stubWorkspaceAccount(t, "", "", false)
+	stubWorkspaceAccount(t, "", "")
 
 	os.Setenv(EnvQiniuAccessKey, "env-ak")
 	os.Setenv(EnvQiniuSecretKey, "env-sk")
@@ -127,7 +127,7 @@ func TestResolveCredentials_FallbackToEnv(t *testing.T) {
 
 func TestResolveCredentials_PartialEnvIsIgnored(t *testing.T) {
 	clearEnvVars(t)
-	stubWorkspaceAccount(t, "", "", false)
+	stubWorkspaceAccount(t, "", "")
 
 	// AK without SK should not produce a credential.
 	os.Setenv(EnvQiniuAccessKey, "env-ak")
@@ -138,14 +138,14 @@ func TestResolveCredentials_PartialEnvIsIgnored(t *testing.T) {
 func TestResolveCredentials_PartialWorkspaceIsIgnored(t *testing.T) {
 	clearEnvVars(t)
 	// Workspace has AK but empty SK — fall through to env (which is also empty).
-	stubWorkspaceAccount(t, "ws-ak", "", true)
+	stubWorkspaceAccount(t, "ws-ak", "")
 
 	assert.Nil(t, resolveCredentials())
 }
 
 func TestResolveCredentials_NoneConfigured(t *testing.T) {
 	clearEnvVars(t)
-	stubWorkspaceAccount(t, "", "", false)
+	stubWorkspaceAccount(t, "", "")
 
 	assert.Nil(t, resolveCredentials())
 }
@@ -153,7 +153,7 @@ func TestResolveCredentials_NoneConfigured(t *testing.T) {
 func TestNewSandboxClient_RequiresAPIKey(t *testing.T) {
 	clearEnvVars(t)
 	// Only AK/SK is configured — sandbox runtime endpoints still need API Key.
-	stubWorkspaceAccount(t, "ws-ak", "ws-sk", true)
+	stubWorkspaceAccount(t, "ws-ak", "ws-sk")
 
 	c, err := NewSandboxClient()
 	assert.Nil(t, c)
@@ -164,7 +164,7 @@ func TestNewSandboxClient_RequiresAPIKey(t *testing.T) {
 
 func TestNewSandboxClient_OKWithAPIKeyOnly(t *testing.T) {
 	clearEnvVars(t)
-	stubWorkspaceAccount(t, "", "", false)
+	stubWorkspaceAccount(t, "", "")
 	os.Setenv(EnvQiniuAPIKey, "k")
 
 	c, err := NewSandboxClient()
@@ -174,7 +174,7 @@ func TestNewSandboxClient_OKWithAPIKeyOnly(t *testing.T) {
 
 func TestNewInjectionRuleClient_RequiresCredentials(t *testing.T) {
 	clearEnvVars(t)
-	stubWorkspaceAccount(t, "", "", false)
+	stubWorkspaceAccount(t, "", "")
 
 	// Only API Key is configured — injection rule endpoints need AK/SK.
 	os.Setenv(EnvQiniuAPIKey, "k")
@@ -188,7 +188,7 @@ func TestNewInjectionRuleClient_RequiresCredentials(t *testing.T) {
 
 func TestNewInjectionRuleClient_OKWithCredentialsOnly(t *testing.T) {
 	clearEnvVars(t)
-	stubWorkspaceAccount(t, "ws-ak", "ws-sk", true)
+	stubWorkspaceAccount(t, "ws-ak", "ws-sk")
 
 	c, err := NewInjectionRuleClient()
 	assert.NoError(t, err)

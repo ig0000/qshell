@@ -140,13 +140,14 @@ func resolveConfig() (apiKey, endpoint string) {
 
 // workspaceAccountLookup is the seam used by resolveCredentials to fetch the
 // active qshell account. Production points it at workspace.GetAccount; tests
-// override it to inject deterministic credentials.
-var workspaceAccountLookup = func() (accessKey, secretKey string, ok bool) {
+// override it to inject deterministic credentials. Returns empty strings when
+// no active account is configured.
+var workspaceAccountLookup = func() (accessKey, secretKey string) {
 	acc, err := workspace.GetAccount()
 	if err != nil {
-		return "", "", false
+		return "", ""
 	}
-	return acc.AccessKey, acc.SecretKey, true
+	return acc.AccessKey, acc.SecretKey
 }
 
 // resolveCredentials returns AK/SK credentials, preferring the active qshell
@@ -161,16 +162,15 @@ var workspaceAccountLookup = func() (accessKey, secretKey string, ok bool) {
 //     the credentials populated by loadUserInfo().
 //  2. QINIU_ACCESS_KEY / QINIU_SECRET_KEY environment variables.
 func resolveCredentials() *auth.Credentials {
-	if ak, sk, ok := workspaceAccountLookup(); ok && ak != "" && sk != "" {
-		return &auth.Credentials{AccessKey: ak, SecretKey: []byte(sk)}
+	ak, sk := workspaceAccountLookup()
+	if ak == "" || sk == "" {
+		ak = os.Getenv(EnvQiniuAccessKey)
+		sk = os.Getenv(EnvQiniuSecretKey)
 	}
-
-	ak := os.Getenv(EnvQiniuAccessKey)
-	sk := os.Getenv(EnvQiniuSecretKey)
-	if ak != "" && sk != "" {
-		return &auth.Credentials{AccessKey: ak, SecretKey: []byte(sk)}
+	if ak == "" || sk == "" {
+		return nil
 	}
-	return nil
+	return &auth.Credentials{AccessKey: ak, SecretKey: []byte(sk)}
 }
 
 // ResumeSandbox resumes a paused sandbox by calling POST /sandboxes/{id}/resume.

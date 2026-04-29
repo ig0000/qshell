@@ -2,7 +2,6 @@ package operations
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/qiniu/go-sdk/v7/sandbox"
 
@@ -40,36 +39,22 @@ func Publish(info PublishInfo) {
 
 	ctx := context.Background()
 
-	action := "publish"
+	verb, past := "publish", "published"
 	if !info.Public {
-		action = "unpublish"
+		verb, past = "unpublish", "unpublished"
 	}
 
-	if !info.Yes {
-		if !sbClient.IsInteractive() {
-			sbClient.PrintError("confirmation required but stdin is not a terminal; pass --yes to confirm in non-interactive mode")
-			return
-		}
-		fmt.Printf("Are you sure you want to %s %d template(s)? [y/N] ", action, len(info.TemplateIDs))
-		var confirm string
-		fmt.Scanln(&confirm)
-		if confirm != "y" && confirm != "Y" {
-			fmt.Println("Aborted")
-			return
-		}
+	if !info.Yes && !sbClient.Confirm("Are you sure you want to %s %d template(s)?", verb, len(info.TemplateIDs)) {
+		return
 	}
 
 	for _, id := range info.TemplateIDs {
 		if uErr := client.UpdateTemplate(ctx, id, sandbox.UpdateTemplateParams{
 			Public: &info.Public,
 		}); uErr != nil {
-			sbClient.PrintError("%s template %s failed: %v", action, id, uErr)
+			sbClient.PrintError("%s template %s failed: %v", verb, id, uErr)
 			continue
 		}
-		if info.Public {
-			sbClient.PrintSuccess("Template %s published", id)
-		} else {
-			sbClient.PrintSuccess("Template %s unpublished", id)
-		}
+		sbClient.PrintSuccess("Template %s %s", id, past)
 	}
 }
