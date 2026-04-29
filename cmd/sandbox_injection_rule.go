@@ -173,17 +173,13 @@ var injectionRuleDeleteCmdBuilder = func(cfg *iqshell.Config) *cobra.Command {
 
   # Delete multiple rules
   qshell sandbox injection-rule delete rule-aaa rule-bbb -y
-  qshell sbx ir dl rule-aaa rule-bbb -y
-
-  # Interactively select rules to delete
-  qshell sandbox injection-rule delete -s
-  qshell sbx ir dl -s`,
+  qshell sbx ir dl rule-aaa rule-bbb -y`,
 		Run: func(cmd *cobra.Command, args []string) {
 			cfg.CmdCfg.CmdId = docs.SandboxInjectionRuleDeleteType
 			if !iqshell.CheckAndLoad(cfg, iqshell.CheckAndLoadInfo{}) {
 				return
 			}
-			if len(args) == 0 && !info.Select {
+			if len(args) == 0 {
 				_ = cmd.Usage()
 				return
 			}
@@ -192,7 +188,6 @@ var injectionRuleDeleteCmdBuilder = func(cfg *iqshell.Config) *cobra.Command {
 		},
 	}
 	cmd.Flags().BoolVarP(&info.Yes, "yes", "y", false, "skip confirmation")
-	cmd.Flags().BoolVarP(&info.Select, "select", "s", false, "interactively select rules to delete")
 	return cmd
 }
 

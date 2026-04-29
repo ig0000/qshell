@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/charmbracelet/huh"
-
 	sbClient "github.com/qiniu/qshell/v2/iqshell/sandbox"
 )
 
@@ -14,11 +12,15 @@ import (
 type DeleteInfo struct {
 	RuleIDs []string
 	Yes     bool
-	Select  bool
 }
 
 // Delete deletes one or more injection rules.
 func Delete(info DeleteInfo) {
+	if len(info.RuleIDs) == 0 {
+		sbClient.PrintError("at least one rule ID is required")
+		return
+	}
+
 	client, err := sbClient.NewInjectionRuleClient()
 	if err != nil {
 		sbClient.PrintError("%v", err)
@@ -26,75 +28,23 @@ func Delete(info DeleteInfo) {
 	}
 
 	ctx := context.Background()
-	ruleIDs := info.RuleIDs
-
-	if info.Select {
-		if !sbClient.IsInteractive() {
-			sbClient.PrintError("--select requires an interactive terminal; pass rule IDs as arguments in non-interactive mode")
-			return
-		}
-		rules, lErr := client.ListInjectionRules(ctx)
-		if lErr != nil {
-			sbClient.PrintError("list injection rules failed: %v", lErr)
-			return
-		}
-		if len(rules) == 0 {
-			fmt.Println("No injection rules found")
-			return
-		}
-
-		options := make([]huh.Option[string], 0, len(rules))
-		for _, r := range rules {
-			label := fmt.Sprintf("%s (%s)", r.RuleID, r.Name)
-			options = append(options, huh.NewOption(label, r.RuleID))
-		}
-
-		var selected []string
-		form := huh.NewForm(
-			huh.NewGroup(
-				huh.NewMultiSelect[string]().
-					Title("Select injection rules to delete").
-					Options(options...).
-					Value(&selected),
-			),
-		)
-		if fErr := form.Run(); fErr != nil {
-			sbClient.PrintError("selection cancelled: %v", fErr)
-			return
-		}
-		if len(selected) == 0 {
-			fmt.Println("No injection rules selected")
-			return
-		}
-		ruleIDs = selected
-	}
-
-	if len(ruleIDs) == 0 {
-		sbClient.PrintError("at least one rule ID is required (or use --select)")
-		return
-	}
 
 	if !info.Yes {
 		if !sbClient.IsInteractive() {
 			sbClient.PrintError("confirmation required but stdin is not a terminal; pass --yes to confirm in non-interactive mode")
 			return
 		}
-		var confirm bool
-		form := huh.NewForm(
-			huh.NewGroup(
-				huh.NewConfirm().
-					Title(fmt.Sprintf("Are you sure you want to delete %d injection rule(s)?", len(ruleIDs))).
-					Value(&confirm),
-			),
-		)
-		if fErr := form.Run(); fErr != nil || !confirm {
+		fmt.Printf("Are you sure you want to delete %d injection rule(s)? [y/N] ", len(info.RuleIDs))
+		var confirm string
+		fmt.Scanln(&confirm)
+		if confirm != "y" && confirm != "Y" {
 			fmt.Println("Aborted")
 			return
 		}
 	}
 
 	hasError := false
-	for _, id := range ruleIDs {
+	for _, id := range info.RuleIDs {
 		if dErr := client.DeleteInjectionRule(ctx, id); dErr != nil {
 			sbClient.PrintError("delete injection rule %s failed: %v", id, dErr)
 			hasError = true

@@ -110,10 +110,6 @@ var templateDeleteCmdBuilder = func(cfg *iqshell.Config) *cobra.Command {
   qshell sandbox template delete tmpl-aaa tmpl-bbb -y
   qshell sbx tpl dl tmpl-aaa tmpl-bbb -y
 
-  # Interactively select templates to delete
-  qshell sandbox template delete -s
-  qshell sbx tpl dl -s
-
   # Delete the template recorded in qshell.sandbox.toml
   qshell sandbox template delete -y
   qshell sbx tpl dl -y`,
@@ -127,7 +123,6 @@ var templateDeleteCmdBuilder = func(cfg *iqshell.Config) *cobra.Command {
 		},
 	}
 	cmd.Flags().BoolVarP(&info.Yes, "yes", "y", false, "skip confirmation")
-	cmd.Flags().BoolVarP(&info.Select, "select", "s", false, "interactively select templates to delete")
 	return cmd
 }
 
@@ -246,10 +241,6 @@ var templatePublishCmdBuilder = func(cfg *iqshell.Config) *cobra.Command {
   qshell sandbox template publish tmpl-xxxxxxxxxxxx -y
   qshell sbx tpl pb tmpl-xxxxxxxxxxxx -y
 
-  # Interactively select templates to publish
-  qshell sandbox template publish -s
-  qshell sbx tpl pb -s
-
   # Publish the template recorded in qshell.sandbox.toml
   qshell sandbox template publish -y
   qshell sbx tpl pb -y`,
@@ -263,7 +254,6 @@ var templatePublishCmdBuilder = func(cfg *iqshell.Config) *cobra.Command {
 		},
 	}
 	cmd.Flags().BoolVarP(&info.Yes, "yes", "y", false, "skip confirmation")
-	cmd.Flags().BoolVarP(&info.Select, "select", "s", false, "interactively select templates")
 	return cmd
 }
 
@@ -276,10 +266,6 @@ var templateUnpublishCmdBuilder = func(cfg *iqshell.Config) *cobra.Command {
 		Example: `  # Unpublish a single template (skip confirmation)
   qshell sandbox template unpublish tmpl-xxxxxxxxxxxx -y
   qshell sbx tpl upb tmpl-xxxxxxxxxxxx -y
-
-  # Interactively select templates to unpublish
-  qshell sandbox template unpublish -s
-  qshell sbx tpl upb -s
 
   # Unpublish the template recorded in qshell.sandbox.toml
   qshell sandbox template unpublish -y
@@ -294,7 +280,6 @@ var templateUnpublishCmdBuilder = func(cfg *iqshell.Config) *cobra.Command {
 		},
 	}
 	cmd.Flags().BoolVarP(&info.Yes, "yes", "y", false, "skip confirmation")
-	cmd.Flags().BoolVarP(&info.Select, "select", "s", false, "interactively select templates")
 	return cmd
 }
 
