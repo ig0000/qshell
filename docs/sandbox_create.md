@@ -7,8 +7,8 @@
 
 # 格式
 ```
-qshell sandbox create [template] [-t <seconds>] [--retry-max <N>] [--detach] [-m <metadata>] [-e <KEY=VALUE>...] [--auto-pause] [--injection-rule <ruleID>...] [--inline-injection <spec>...] [--resource <spec>...]
-qshell sbx cr [template] [-t <seconds>] [--retry-max <N>] [--detach] [-m <metadata>] [-e <KEY=VALUE>...] [--auto-pause] [--injection-rule <ruleID>...] [--inline-injection <spec>...] [--resource <spec>...]
+qshell sandbox create [template] [-t <seconds>] [--retry-max <N>] [--detach] [-u <user>] [-m <metadata>] [-e <KEY=VALUE>...] [--auto-pause] [--injection-rule <ruleID>...] [--inline-injection <spec>...] [--resource <spec>...]
+qshell sbx cr [template] [-t <seconds>] [--retry-max <N>] [--detach] [-u <user>] [-m <metadata>] [-e <KEY=VALUE>...] [--auto-pause] [--injection-rule <ruleID>...] [--inline-injection <spec>...] [--resource <spec>...]
 ```
 
 # 帮助文档
@@ -27,6 +27,7 @@ $ qshell sandbox create --doc
 - `-t, --timeout`：沙箱超时时间（秒）
 - `--retry-max`：创建请求的最大自动重试次数；`0` 禁用重试。未传入时优先读取 `SANDBOX_RETRY_MAX`，未设置则默认重试 5 次
 - `--detach`：创建沙箱但不连接终端，沙箱保持存活直到超时。此参数没有短参数
+- `-u, --user`：终端运行的用户；未指定时使用沙箱默认用户（`user`）。与 `--detach` 同时使用时不生效（不连接终端）
 - `-m, --metadata`：元数据键值对（格式：key1=value1,key2=value2）
 - `-e, --env-var`：环境变量（KEY=VALUE 格式，可多次指定）
 - `--auto-pause`：超时后自动暂停沙箱，而不是终止沙箱
@@ -126,4 +127,10 @@ $ qshell sandbox create my-template \
     --resource 'type=kodo,bucket=my-bucket,mount-path=/mnt/kodo,prefix=datasets/,read-only=true'
 $ qshell sbx cr my-template \
     --resource 'type=kodo,bucket=my-bucket,mount=/mnt/kodo'
+```
+
+13. 以 `root` 用户身份连接终端
+```
+$ qshell sandbox create my-template -u root
+$ qshell sbx cr my-template --user root
 ```

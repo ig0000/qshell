@@ -1,3 +1,7 @@
+# 2.19.12 (2026-08-11)
+## 新增
+1. `qshell sandbox create` 与 `qshell sandbox connect` 新增 `--user` / `-u` 参数，用于指定终端的运行用户；未指定时使用沙箱默认用户，`create` 搭配 `--detach` 时该参数不生效（不连接终端）
+
 # 2.19.11 (2026-07-30)
 ## 新增
 1. `qshell sandbox create` 通过 SDK 请求幂等键支持安全重试；未显式指定幂等键时 SDK 会自动生成

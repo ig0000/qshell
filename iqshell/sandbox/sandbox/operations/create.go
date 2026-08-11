@@ -14,7 +14,9 @@ import (
 
 // CreateInfo holds parameters for creating a sandbox.
 type CreateInfo struct {
-	TemplateID      string
+	TemplateID string
+	// User 终端运行的用户，仅在非 detach 模式下生效
+	User            string
 	RetryMax        *int
 	Timeout         int32
 	Metadata        string
@@ -109,7 +111,12 @@ func Create(info CreateInfo) {
 		}
 	}()
 
-	runTerminalSession(ctx, sb)
+	var opts []sandbox.CommandOption
+	if info.User != "" {
+		opts = append(opts, sandbox.WithCommandUser(info.User))
+	}
+
+	runTerminalSession(ctx, sb, opts...)
 }
 
 func buildSandboxInjections(ruleIDs, inlineSpecs []string) ([]sandbox.SandboxInjectionSpec, error) {

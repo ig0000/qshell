@@ -92,7 +92,8 @@ func detectResize(previous terminalSize, width, height int, err error) (terminal
 }
 
 // runTerminalSession creates a PTY session and handles stdin/stdout bridging.
-func runTerminalSession(ctx context.Context, sb *sandbox.Sandbox) {
+// opts 会追加到 PTY 创建选项中，用于指定运行用户等。
+func runTerminalSession(ctx context.Context, sb *sandbox.Sandbox, opts ...sandbox.CommandOption) {
 	// Get terminal size
 	width, height, err := term.GetSize(int(os.Stdin.Fd()))
 	if err != nil {
@@ -111,12 +112,15 @@ func runTerminalSession(ctx context.Context, sb *sandbox.Sandbox) {
 	defer ptyCancel()
 
 	// Create PTY session
+	ptyOpts := append([]sandbox.CommandOption{
+		sandbox.WithOnPtyData(func(data []byte) {
+			os.Stdout.Write(data)
+		}),
+	}, opts...)
 	handle, err := sb.Pty().Create(ptyCtx, sandbox.PtySize{
 		Cols: uint32(width),
 		Rows: uint32(height),
-	}, sandbox.WithOnPtyData(func(data []byte) {
-		os.Stdout.Write(data)
-	}))
+	}, ptyOpts...)
 	if err != nil {
 		sbClient.PrintError("create PTY failed: %v", err)
 		return

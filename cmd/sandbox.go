@@ -135,7 +135,11 @@ var sandboxCreateCmdBuilder = func(cfg *iqshell.Config) *cobra.Command {
 
   # Create with a Kodo bucket resource mounted into the sandbox
   qshell sandbox create my-template \
-    --resource 'type=kodo,bucket=my-bucket,mount-path=/mnt/kodo,prefix=datasets/,read-only=true'`,
+    --resource 'type=kodo,bucket=my-bucket,mount-path=/mnt/kodo,prefix=datasets/,read-only=true'
+
+  # Create and connect to the terminal as a specific user
+  qshell sandbox create my-template -u root
+  qshell sbx cr my-template -u root`,
 		Args: cobra.MaximumNArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			cfg.CmdCfg.CmdId = docs.SandboxCreateType
@@ -154,6 +158,7 @@ var sandboxCreateCmdBuilder = func(cfg *iqshell.Config) *cobra.Command {
 	cmd.Flags().Int32VarP(&info.Timeout, "timeout", "t", 0, "sandbox timeout in seconds")
 	cmd.Flags().IntVar(&retryMax, "retry-max", 0, "maximum automatic retries for sandbox creation (0 disables retries; default uses SANDBOX_RETRY_MAX or 5)")
 	cmd.Flags().BoolVar(&info.Detach, "detach", false, "create sandbox without connecting terminal (sandbox stays alive until timeout)")
+	cmd.Flags().StringVarP(&info.User, "user", "u", "", "user to run the terminal as (default: sandbox default user; ignored with --detach)")
 	cmd.Flags().StringVarP(&info.Metadata, "metadata", "m", "", "metadata key=value pairs (comma-separated)")
 	cmd.Flags().StringArrayVarP(&info.EnvVars, "env-var", "e", nil, "environment variables (KEY=VALUE, can be specified multiple times)")
 	cmd.Flags().BoolVar(&info.AutoPause, "auto-pause", false, "automatically pause sandbox when timeout expires (instead of killing)")
@@ -164,6 +169,7 @@ var sandboxCreateCmdBuilder = func(cfg *iqshell.Config) *cobra.Command {
 }
 
 var sandboxConnectCmdBuilder = func(cfg *iqshell.Config) *cobra.Command {
+	info := operations.ConnectInfo{}
 	retryMax := 0
 	cmd := &cobra.Command{
 		Use:     "connect <sandboxID>",
@@ -171,7 +177,10 @@ var sandboxConnectCmdBuilder = func(cfg *iqshell.Config) *cobra.Command {
 		Short:   "Connect to an existing sandbox terminal (alias: cn)",
 		Example: `  # Connect to a sandbox by ID
   qshell sandbox connect sb-xxxxxxxxxxxx
-  qshell sbx cn sb-xxxxxxxxxxxx`,
+  qshell sbx cn sb-xxxxxxxxxxxx
+
+  # Connect as a specific user
+  qshell sandbox connect sb-xxxxxxxxxxxx -u root`,
 		Run: func(cmd *cobra.Command, args []string) {
 			cfg.CmdCfg.CmdId = docs.SandboxConnectType
 			if !iqshell.CheckAndLoad(cfg, iqshell.CheckAndLoadInfo{}) {
@@ -181,7 +190,7 @@ var sandboxConnectCmdBuilder = func(cfg *iqshell.Config) *cobra.Command {
 				_ = cmd.Usage()
 				return
 			}
-			info := operations.ConnectInfo{SandboxID: args[0]}
+			info.SandboxID = args[0]
 			if cmd.Flags().Changed("retry-max") {
 				info.RetryMax = &retryMax
 			}
@@ -189,6 +198,7 @@ var sandboxConnectCmdBuilder = func(cfg *iqshell.Config) *cobra.Command {
 		},
 	}
 	cmd.Flags().IntVar(&retryMax, "retry-max", 0, "maximum automatic retries for sandbox connection (0 disables retries; default uses SANDBOX_RETRY_MAX or 5)")
+	cmd.Flags().StringVarP(&info.User, "user", "u", "", "user to run the terminal as (default: sandbox default user)")
 	return cmd
 }
 

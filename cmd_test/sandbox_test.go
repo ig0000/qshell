@@ -125,6 +125,10 @@ func TestSandboxCreateDocumentWithEnvVar(t *testing.T) {
 	testSubcommandDocumentWithFlags(t, []string{"sandbox", "create"}, "-e", "FOO=bar", "-e", "BAZ=qux")
 }
 
+func TestSandboxCreateDocumentWithUser(t *testing.T) {
+	testSubcommandDocumentWithFlags(t, []string{"sandbox", "create"}, "my-template", "-u", "root")
+}
+
 func TestSandboxKillDocumentWithAll(t *testing.T) {
 	testSubcommandDocumentWithFlags(t, []string{"sandbox", "kill"}, "--all")
 }
@@ -143,6 +147,10 @@ func TestSandboxResumeDocumentWithAll(t *testing.T) {
 
 func TestSandboxResumeDocumentWithFlags(t *testing.T) {
 	testSubcommandDocumentWithFlags(t, []string{"sandbox", "resume"}, "--all", "-m", "env=staging")
+}
+
+func TestSandboxConnectDocumentWithFlags(t *testing.T) {
+	testSubcommandDocumentWithFlags(t, []string{"sandbox", "connect"}, "sb-test", "-u", "root")
 }
 
 func TestSandboxExecDocumentWithFlags(t *testing.T) {

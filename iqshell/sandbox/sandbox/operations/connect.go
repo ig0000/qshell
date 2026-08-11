@@ -11,6 +11,7 @@ import (
 // ConnectInfo holds parameters for connecting to a sandbox.
 type ConnectInfo struct {
 	SandboxID string
+	User      string
 	RetryMax  *int
 }
 
@@ -36,5 +37,10 @@ func Connect(info ConnectInfo) {
 	}
 	sbClient.PrintSuccess("Connected to sandbox %s", sb.ID())
 
-	runTerminalSession(ctx, sb)
+	var opts []sandbox.CommandOption
+	if info.User != "" {
+		opts = append(opts, sandbox.WithCommandUser(info.User))
+	}
+
+	runTerminalSession(ctx, sb, opts...)
 }
